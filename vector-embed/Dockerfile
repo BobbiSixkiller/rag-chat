@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8000
 
 # Run the FastAPI service using uvicorn.
-CMD ["uvicorn", "embed_service:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "vector-service:app", "--host", "0.0.0.0", "--port", "8000"]
