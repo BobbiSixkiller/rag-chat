@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  vector-embed:
+    build: ./vector-embed
+    container_name: vector-embed
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+
+  scraper:
+    build: ./scraper
+    container_name: scraper
+    depends_on:
+      - mongodb
+      - vector-embed
+    entrypoint: ["./entrypoint.sh"]
+
+volumes:
+  mongo_data:
