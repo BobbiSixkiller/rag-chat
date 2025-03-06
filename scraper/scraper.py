@@ -1,4 +1,3 @@
-# recursive_scraper.py
 import os
 import time
 import requests
@@ -27,12 +26,14 @@ def scrape_page(url):
     If the URL is a PDF, skip embedding and just record the URL.
     Returns a dict with title, content, language, and the URL.
     """
+    # Set the language to 'en' if the URL contains '/en/' or keep it 'sk' otherwise
+    language = "en" if "/en/" in url else "sk"
+
     if url.lower().endswith(".pdf"):
         logging.info("Skipping PDF for embedding: %s", url)
         # Instead of extracting PDF text, just create a minimal record.
         title = os.path.basename(url)
         content = f"PDF file available at: {url}"
-        language = "sk"  # Adjust as needed
         return {"title": title, "content": content, "language": language, "url": url}
 
     try:
@@ -55,7 +56,6 @@ def scrape_page(url):
     image_alts = [img.get("alt") for img in soup.find_all("img") if img.get("alt")]
 
     content = "\n".join(headers + paragraphs + image_alts)
-    language = "sk"  # Adjust as needed
 
     return {"title": title, "content": content, "language": language, "url": url}
 

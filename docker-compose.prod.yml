@@ -32,7 +32,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    command: ["uvicorn", "vector-service:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]  # Enable auto-reloading during development
 
   scraper:
     build: ./scraper
@@ -46,7 +45,6 @@ services:
       - ./scraper:/app
     environment:
       - PYTHONUNBUFFERED=1
-    command: ["watchmedo", "auto-restart", "--patterns=*.py", "--", "python", "scraper.py"]  # Watch for Python file changes and restart script
 
 volumes:
   mongo_data:

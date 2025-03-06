@@ -15,3 +15,7 @@ async def embed_text(payload: TextPayload):
         return {"embedding": embedding}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/health")
+def read_health():
+    return {"status": "healthy"}
