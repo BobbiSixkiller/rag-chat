@@ -7,6 +7,7 @@ services:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
+    command: ["mongod", "--setParameter", "featureFlagSearchIndexes=true"]  # ✅ Enable Vector Search
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh mongo/test --quiet
       interval: 30s
@@ -22,8 +23,6 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-    volumes:
-      - ./vector-embed:/app  # Mount local code to sync changes in development
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
@@ -41,8 +40,6 @@ services:
         condition: service_healthy
       vector-embed:
         condition: service_healthy
-    volumes:
-      - ./scraper:/app
     environment:
       - PYTHONUNBUFFERED=1
 
