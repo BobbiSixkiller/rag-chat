@@ -1,0 +1,48 @@
+{
+  "heading": "Stáže",
+  "subHeading": "Zoznam ponúkaných stáží",
+  "new": "Vytvoriť novú staž",
+  "Applied": "Prihláška podaná",
+  "Eligible": "Schválená fakultou",
+  "Accepted": "Prihláška prijatá",
+  "Rejected": "Prihláška zamietnutá",
+  "Bachelor1": "1. Bakalársky",
+  "Bachelor2": "2. Bakalársky",
+  "Bachelor3": "3. Bakalársky",
+  "Master1": "1. Magisterský",
+  "Master2": "2. Magisterský",
+  "application": "Prihláška",
+  "contact": "Kontakt",
+  "files": "Priložené súbory:",
+  "accept": "Prijať kandidáta",
+  "reject": "Zamietnuť kandidáta",
+  "internReview": "Nahrať potvrdenie o absolvovaní stáže",
+  "update": "Aktualizovať stáž",
+  "delete": {
+    "title": "Zmazať stáž",
+    "text": "Naozaj chcete zmazať túto stáž?"
+  },
+  "deleteIntern": {
+    "title": "Zmazať prihlášku",
+    "text": "Naozaj si prajete zmazať túto prihlášku?"
+  },
+  "form": {
+    "dept": "Odbor (organizačný útvar) / Sekcia:",
+    "name": "Nazov...",
+    "semesterLabel": "Stáž prebieha v semestri:",
+    "semester": "Zimný, letný",
+    "estimatedLength": "Predpokladané trvanie stáže:",
+    "timePeriod": "1-2 mesiace (prípadne podľa dohody)",
+    "internsCountLabel": "Počet stážistov/semester:",
+    "internsCount": "Max. 2",
+    "educLabel": "Stupeň vzdelania:",
+    "educ": "študenti Mgr. štúdia",
+    "lngLabel": "Jazykové požiadavky:",
+    "lng": "Štátny jazyk",
+    "otherLabel": "Iné požiadavky:",
+    "other": "Proaktívny a zodpovedný prístup k práci, dôslednosť pri plnení zadaných úloh",
+    "internshipDescLabel": "Predpokladaná náplň stáže:",
+    "internshipDesc": "Bod naplne staze..."
+  },
+  "orgFeedback": "Potvrdenie absolvovania"
+}

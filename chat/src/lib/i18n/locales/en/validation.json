@@ -1,0 +1,17 @@
+{
+  "required": "This is a required field!",
+  "email": "Invalid email address!",
+  "password": "Password must have minimum eight characters, at least one letter and one number!",
+  "confirmPass": "Passwords do not match!",
+  "terms": "You have to agree with privacy policy!",
+  "role": "Unknown role!",
+  "date": "You have to set Date!",
+  "endDateInvalid": "End date can't be before start date!",
+  "min": "Minimum value is {{value}}!",
+  "ticket": "Choose a form of attendance!",
+  "keywords": "Add at least {{value}} keyword!",
+  "maxFiles": "Maximum number of files is {{value}}!",
+  "minFiles": "Minimum number of files is {{value}}!",
+  "phone": "Invalid phone number!",
+  "isUniba": "Email domain must include 'uniba.sk'"
+}

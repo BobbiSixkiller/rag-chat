@@ -1,0 +1,30 @@
+{
+  "download": "Stiahnuť faktúru",
+  "loading": "Sťahujem...",
+  "subject": "Faktúra",
+  "invoice": {
+    "issuer": "Vydal",
+    "payer": "Platca",
+    "name": "Meno/organizácia",
+    "address": {
+      "street": "Ulica",
+      "city": "Mesto",
+      "postal": "PSČ",
+      "country": "Krajina"
+    },
+    "ICO": "IČO",
+    "DIC": "DIČ",
+    "ICDPH": "IČDPH",
+    "variableSymbol": "Variabilný symbol",
+    "IBAN": "IBAN",
+    "SWIFT": "SWIFT",
+    "issueDate": "Dátum vystavenia",
+    "dueDate": "Dátum splatnosti",
+    "vatDate": "Dátum zdaniteľného plnenia"
+  },
+  "fee": "Konferenčný poplatok",
+  "sum": "Spolu",
+  "item": "Položka",
+  "price": "Cena",
+  "vat": "DPH"
+}

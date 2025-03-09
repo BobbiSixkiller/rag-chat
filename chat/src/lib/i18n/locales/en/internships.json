@@ -1,0 +1,48 @@
+{
+  "heading": "Internships",
+  "subHeading": "List of internships offered",
+  "new": "Create new internship",
+  "Applied": "Applied",
+  "Eligible": "Forwarded by faculty",
+  "Accepted": "Accepted",
+  "Rejected": "Rejected",
+  "Bachelor1": "1st Bachelor",
+  "Bachelor2": "2nd Bachelor",
+  "Bachelor3": "3rd Bachelor",
+  "Master1": "1st Master",
+  "Master2": "2nd Master",
+  "application": "Application",
+  "contact": "Contact:",
+  "files": "Appended files:",
+  "accept": "Accept applicant",
+  "reject": "Reject applicant",
+  "internReview": "Upload internship completition confirmation",
+  "update": "Update internship",
+  "delete": {
+    "title": "Delete internship",
+    "text": "Do you really want to delete this internship?"
+  },
+  "deleteIntern": {
+    "title": "Delete application",
+    "text": "Do you really want to delete this application?"
+  },
+  "form": {
+    "dept": "Department (organizational unit) / Section:",
+    "name": "Name...",
+    "semesterLabel": "The internship takes place in the semester:",
+    "semester": "Winter, summer",
+    "estimatedLength": "Estimated length of internship:",
+    "timePeriod": "1-2 months (or by agreement)",
+    "internsCountLabel": "Number of interns/semester:",
+    "internsCount": "Max. 2",
+    "educLabel": "Education level:",
+    "educ": "students of M.Sc. studies",
+    "lngLabel": "Language requirements:",
+    "lng": "National Language",
+    "otherLabel": "Other requirements:",
+    "other": "Proactive and responsible approach to work, consistency in completing assigned tasks",
+    "internshipDescLabel": "Internship description:",
+    "internshipDesc": "Internship description point..."
+  },
+  "orgFeedback": "Certificate of completition"
+}

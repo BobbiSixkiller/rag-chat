@@ -1,13 +1,16 @@
-version: '3.8'
 services:
   mongodb:
-    image: mongo:latest
+    image: mongodb/mongodb-atlas-local:8.0
     container_name: mongodb
+    hostname: mongodb
     ports:
       - "27018:27017"
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=user
+      - MONGODB_INITDB_ROOT_PASSWORD=pass
     volumes:
       - mongo_data:/data/db
-    command: ["mongod", "--setParameter", "featureFlagSearchIndexes=true"]  # ✅ Enable Vector Search
+      - mongo_config:/data/configdb
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh mongo/test --quiet
       interval: 30s
@@ -49,5 +52,26 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["watchmedo", "auto-restart", "--patterns=*.py", "--", "python", "scraper.py"]  # Watch for Python file changes and restart script
 
+  chat:
+    build:
+      context: ./chat
+      dockerfile: Dockerfile
+    container_name: chat
+    command: npm run dev
+    environment:
+      - MONGO_URI=mongodb://user:pass@localhost:27018/?directConnection=true
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      vector-embed:
+        condition: service_healthy    
+    volumes:
+      - ./chat/:/usr/app
+      - /usr/app/node_modules
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
 volumes:
   mongo_data:
+  mongo_config:

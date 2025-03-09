@@ -3,3 +3,5 @@ uvicorn
 sentence-transformers
 pydantic
 torch
+pymongo
+

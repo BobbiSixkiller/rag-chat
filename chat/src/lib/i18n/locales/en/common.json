@@ -1,0 +1,28 @@
+{
+  "update": "Update",
+  "new": "New",
+  "create": "Create",
+  "delete": "Delete",
+  "error": "Error",
+  "success": "Success",
+  "notFoundMsg": "Could not find requested resource",
+  "more": "More",
+  "step": "Step",
+  "confirm": "Confirm",
+  "deleteConfirm": "Do you really wish to delete {{name}}?",
+  "notFound": "Nothing found.",
+  "flaw": "Comenius University in Bratislava, Faculty of Law",
+  "updatedAt": "Updated at {{ value }}",
+  "submit": "Submit",
+  "upload": "Upload",
+  "placeholder": {
+    "heading": "Heading {{ lvl }}...",
+    "list": "Bullet point...",
+    "default": "Press '/' to change element..."
+  },
+  "street": "Street",
+  "city": "City",
+  "postal": "Postal",
+  "country": "Country",
+  "address": "Address"
+}
