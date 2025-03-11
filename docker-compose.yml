@@ -59,7 +59,7 @@ services:
     container_name: chat
     command: npm run dev
     environment:
-      - MONGO_URI=mongodb://user:pass@localhost:27018/?directConnection=true
+      - MONGO_URI=mongodb://user:pass@mongodb:27018/?directConnection=true
     depends_on:
       mongodb:
         condition: service_healthy

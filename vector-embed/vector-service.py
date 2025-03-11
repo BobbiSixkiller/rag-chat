@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from pymongo import MongoClient
+from bson import json_util
 from sentence_transformers import SentenceTransformer
 import os
 
@@ -50,13 +51,14 @@ async def search_similar_documents(
                     "path": "embedding",
                     "numCandidates": 100,
                     "limit": limit,
-                    "index": "default",  # Ensure this matches your MongoDB index name
+                    "index": "cmsVector",  # Ensure this matches your MongoDB index name
                     "filter": {"language": language}  # Filter results by language
                 }
             },
             {
                 "$project": {
                     "_id": 0,
+                    "id": { "$toString": "$_id"},
                     "title": 1,
                     "url": 1,
                     "language": 1,
@@ -66,6 +68,5 @@ async def search_similar_documents(
         ])
 
         return {"results": list(results)}
-    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -42,30 +42,38 @@ try:
     db = client["cms_db"]
     collection = db["cms_documents"]
     
-    # Check if vector search index exists before creating it
-    existing_indexes = db.command("listSearchIndexes", "cms_documents")
-    if not any(index.get("name") == "default" for index in existing_indexes):
-        search_index_def = {
-            "definition": {
-                "mappings": {
-                    "dynamic": True,
-                    "fields": {
-                        "embedding": {
-                            "type": "knnVector",
-                            "dimensions": 384,  # Ensure this matches your embedding model
-                            "similarity": "cosine"
-                        },
-                        "language": {
-                            "type": "string"
-                        }
+    search_index_def = {
+        "name": "cmsVector",
+        "definition": {
+            "mappings": {
+                "dynamic": True,
+                "fields": {
+                    "embedding": {
+                        "type": "knnVector",
+                        "dimensions": 384,  # Ensure this matches your embedding model
+                        "similarity": "cosine"
+                    },
+                    "language": {
+                        "type": "token"  # Use 'token' instead of 'string'
                     }
                 }
             }
         }
-        result = collection.create_search_index(search_index_def)
-        logging.info("✅ Vector search index created successfully: %s", result)
-    else:
-        logging.info("✅ Vector search index already exists.")
+    }
+    # Ensure the collection exists by inserting a dummy document
+    try:
+        collection.insert_one({"_id": "dummy"})
+        logging.info("✅ Dummy document inserted to create the collection.")
+    except Exception as e:
+        logging.error("❌ Failed to insert dummy document: %s", e)
+
+    try:
+        vectorIndex = collection.create_search_index(search_index_def)
+        logging.info("✅ Vector search index created successfully: %s", vectorIndex)
+    except Exception as e:
+        logging.error("❌ Failed to create search index: %s", e)
+    collection.delete_one({"_id": "dummy"})
+    logging.info("🗑️ Dummy document removed after index creation.")
 except Exception as e:
     logging.error("❌ Failed to set up MongoDB: %s", e)
     sys.exit(1)  # Exit if MongoDB is not available
@@ -150,6 +158,10 @@ def crawl(url, visited, depth, max_depth):
     
     for link in soup.find_all("a", href=True):
         next_url = urljoin(url, link["href"])
+        # Skip URLs that contain '/typo3temp/pics/'
+        if "/pics/" in next_url:
+            logging.info("Skipping link (likely an image/file): %s", next_url)
+            continue
         if urlparse(next_url).netloc == DOMAIN:
             time.sleep(1)
             crawl(next_url, visited, depth + 1, max_depth)
