@@ -52,6 +52,22 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["watchmedo", "auto-restart", "--patterns=*.py", "--", "python", "scraper.py"]  # Watch for Python file changes and restart script
 
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11435:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            capabilities: ["gpu"]
+            count: all  # Adjust count for the number of GPUs you want to use
+    volumes:
+      - ollama:/root/.ollama
+    restart: always    
+
   chat:
     build:
       context: ./chat
@@ -66,7 +82,7 @@ services:
       vector-embed:
         condition: service_healthy    
     volumes:
-      - ./chat/:/usr/app
+      - ./chat:/usr/app
       - /usr/app/node_modules
     restart: unless-stopped
     ports:
@@ -75,3 +91,4 @@ services:
 volumes:
   mongo_data:
   mongo_config:
+  ollama:
