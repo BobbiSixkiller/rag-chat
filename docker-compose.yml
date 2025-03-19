@@ -76,6 +76,7 @@ services:
     command: npm run dev
     environment:
       - MONGO_URI=mongodb://user:pass@mongodb:27018/?directConnection=true
+      - WATCHPACK_POLLING=1
     depends_on:
       mongodb:
         condition: service_healthy

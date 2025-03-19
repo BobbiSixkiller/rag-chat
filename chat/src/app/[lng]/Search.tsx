@@ -7,13 +7,12 @@ const SearchComponent = () => {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
   const { lng } = useParams<{ lng: string }>();
-  console.log(lng);
 
   const fetchAndStream = async () => {
     const res = await fetch(
       `http://vector-embed:8000/search?query=${encodeURIComponent(
         query
-      )}&language=sk`
+      )}&language=${lng}`
     );
     const reader = res?.body?.getReader();
     const decoder = new TextDecoder();
@@ -40,11 +39,11 @@ const SearchComponent = () => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search query"
-        className="border shadow-sm"
+        className="border shadow-sm p-2"
       />
       <button
         onClick={handleSearch}
-        className="cursor-pointer border bg-gray-300 p-2"
+        className="cursor-pointer border bg-blue-300 p-2"
       >
         Search
       </button>

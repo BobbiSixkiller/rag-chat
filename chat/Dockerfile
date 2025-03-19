@@ -17,7 +17,7 @@ RUN npm run build
 # Production Stage
 FROM node:22-alpine AS production
 
-# Set working directory
+# Set working director
 WORKDIR /usr/app
 
 # Install dependencies
