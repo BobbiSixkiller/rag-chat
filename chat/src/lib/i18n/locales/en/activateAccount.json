@@ -1,7 +1,0 @@
-{
-  "heading": "Account activation",
-  "body": "In order to activate your user account please click on the activation link we have sent you.",
-  "button": "Resend activation link",
-  "homeLink": "{{message}} Continue <homeLink>home</homeLink>.",
-  "retryLink": "{{message}} <retryLink>Try again</retryLink>."
-}

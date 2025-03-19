@@ -1,7 +1,0 @@
-{
-  "heading": "Aktivácia účtu",
-  "body": "Pre aktivovanie Vášho používateľského účtu kliknite prosím na aktivačný link, ktorý sme zaslali na Vašu email adresu.",
-  "button": "Zaslať nový aktivačný link",
-  "homeLink": "{{message}} Pokračujte <homeLink>domov</homeLink>.",
-  "retryLink": "{{message}} <retryLink>Skúsiť znova</retryLink>."
-}

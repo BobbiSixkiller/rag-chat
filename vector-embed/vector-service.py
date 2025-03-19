@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
@@ -7,6 +8,15 @@ import os
 import requests
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict this to specific origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Or specify methods like ["GET", "POST"]
+    allow_headers=["*"],  # Or specify headers like ["Content-Type"]
+)
+
 
 # Load embedding model
 model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
