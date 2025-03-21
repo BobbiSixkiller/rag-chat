@@ -5,6 +5,8 @@ services:
     hostname: mongodb
     ports:
       - "27018:27017"
+    networks:
+      - rag-chat-network
     environment:
       - MONGODB_INITDB_ROOT_USERNAME=user
       - MONGODB_INITDB_ROOT_PASSWORD=pass
@@ -23,11 +25,13 @@ services:
     container_name: vector-embed
     ports:
       - "8000:8000"
+    networks:
+      - rag-chat-network
     depends_on:
       mongodb:
         condition: service_healthy
     volumes:
-      - ./vector-embed:/app  # Mount local code to sync changes in development
+      - ./vector-embed:/app # Mount local code to sync changes in development
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
@@ -36,7 +40,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    command: ["uvicorn", "vector-service:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]  # Enable auto-reloading during development
+    command: [
+        "uvicorn",
+        "vector-service:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ] # Enable auto-reloading during development
 
   scraper:
     build: ./scraper
@@ -46,27 +58,38 @@ services:
         condition: service_healthy
       vector-embed:
         condition: service_healthy
+    networks:
+      - rag-chat-network
     volumes:
       - ./scraper:/app
     environment:
       - PYTHONUNBUFFERED=1
-    command: ["watchmedo", "auto-restart", "--patterns=*.py", "--", "python", "scraper.py"]  # Watch for Python file changes and restart script
+    command: [
+        "watchmedo",
+        "auto-restart",
+        "--patterns=*.py",
+        "--",
+        "python",
+        "scraper.py",
+      ] # Watch for Python file changes and restart script
 
   ollama:
     image: ollama/ollama
     container_name: ollama
     ports:
       - "11435:11434"
+    networks:
+      - rag-chat-network
     deploy:
       resources:
         reservations:
           devices:
-          - driver: nvidia
-            capabilities: ["gpu"]
-            count: all  # Adjust count for the number of GPUs you want to use
+            - driver: nvidia
+              capabilities: ["gpu"]
+              count: all # Adjust count for the number of GPUs you want to use
     volumes:
       - ollama:/root/.ollama
-    restart: always    
+    restart: always
 
   chat:
     build:
@@ -81,15 +104,21 @@ services:
       mongodb:
         condition: service_healthy
       vector-embed:
-        condition: service_healthy    
+        condition: service_healthy
     volumes:
       - ./chat:/usr/app
       - /usr/app/node_modules
     restart: unless-stopped
     ports:
       - "3000:3000"
+    networks:
+      - rag-chat-network
 
 volumes:
   mongo_data:
   mongo_config:
   ollama:
+
+networks:
+  rag-chat-network:
+    driver: bridge

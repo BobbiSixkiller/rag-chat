@@ -11,7 +11,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to specific origins
+    allow_origins=["http://localhost:3000", "http://chat:3000"],  # You can restrict this to specific origins
     allow_credentials=True,
     allow_methods=["*"],  # Or specify methods like ["GET", "POST"]
     allow_headers=["*"],  # Or specify headers like ["Content-Type"]
@@ -48,7 +48,7 @@ def read_health():
 async def search_similar_documents(
     query: str = Query(..., description="Text query for vector search"),
     language: str = Query(..., description="Language filter (e.g., 'en' or 'sk')"),
-    limit: int = 3
+    limit: int = 5
 ):
     """Search for the most similar documents using vector search with language filtering."""
     try:
@@ -80,35 +80,37 @@ async def search_similar_documents(
             }
         ])
 
-        # Build a prompt for the Ollama model using the query and the search results
-        prompt = f"Query: {query}\nLanguage: {language}\n\nDocuments:\n"
-        if results:
-            for doc in results:
-                title = doc.get("title", "No title")
-                content = doc.get("content", "No content")
-                prompt += f"- {title} ({content})\n"
-        else:
-            prompt += "No documents found.\n"
-        prompt += "\nUsing the above documents, generate a concise and helpful response to user query in provided language."
+        # # Build a prompt for the Ollama model using the query and the search results
+        # prompt = f"Query: {query}\nLanguage: {language}\n\nDocuments:\n"
+        # if results:
+        #     for doc in results:
+        #         title = doc.get("title", "No title")
+        #         content = doc.get("content", "No content")
+        #         prompt += f"- {title} ({content})\n"
+        # else:
+        #     prompt += "No documents found.\n"
+        # prompt += "\nUsing the above documents, generate a concise and helpful response to user query in provided language."
 
-        # Call the Ollama API to generate a response
-        ollama_url = "http://ollama:11434/api/generate"
-        ollama_payload = {"prompt": prompt, "model": "llama3"}
-        ollama_resp = requests.post(ollama_url, json=ollama_payload)
-        if ollama_resp.status_code != 200:
-            raise HTTPException(status_code=ollama_resp.status_code, detail="Ollama API error")
+        # # Call the Ollama API to generate a response
+        # ollama_url = "http://ollama:11434/api/generate"
+        # ollama_payload = {"prompt": prompt, "model": "llama3"}
+        # ollama_resp = requests.post(ollama_url, json=ollama_payload, stream=True)
         
-        # Stream the response from Ollama to the client
-        def generate_stream():
-            # Stream each chunk as it comes
-            for chunk in ollama_resp.iter_content(chunk_size=1024):
-                yield chunk  # Yield each chunk of data
+        # if ollama_resp.status_code != 200:
+        #     raise HTTPException(status_code=ollama_resp.status_code, detail="Ollama API error")
+        
+        # # Stream the response from Ollama to the client
+        # def generate_stream():
+        #     # Stream each chunk as it comes
+        #     for chunk in ollama_resp.iter_content(chunk_size=1024):
+        #         yield chunk  # Yield each chunk of data
             
-            # End the response stream
-            yield b''
+        #     # End the response stream
+        #     yield b''
 
-        # Return the streaming response
-        return StreamingResponse(generate_stream(), media_type="text/plain")
+        # # Return the streaming response
+        # return StreamingResponse(generate_stream(), media_type="text/plain")
+        return list(results)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

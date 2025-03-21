@@ -160,7 +160,10 @@ def crawl(url, visited, depth, max_depth):
         next_url = urljoin(url, link["href"])
         # Skip URLs that contain '/typo3temp/pics/'
         if "/pics/" in next_url:
-            logging.info("Skipping link (likely an image/file): %s", next_url)
+            logging.info("Skipping link (likely an image): %s", next_url)
+            continue
+        if "/fileadmin/" in next_url:
+            logging.info("Skipping link (likely an file): %s", next_url)
             continue
         if urlparse(next_url).netloc == DOMAIN:
             time.sleep(1)

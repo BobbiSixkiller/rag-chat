@@ -12,21 +12,34 @@ const SearchComponent = () => {
   const { t } = useTranslation(lng, "search");
 
   const fetchAndStream = async () => {
-    const res = await fetch(
-      `http://localhost:8000/search?query=${encodeURIComponent(
-        query
-      )}&language=${lng}`
-    );
-    const reader = res?.body?.getReader();
-    const decoder = new TextDecoder();
-    let result = "";
+    try {
+      const res = await fetch(
+        `http://localhost:8000/search?query=${encodeURIComponent(
+          query
+        )}&language=${lng}`
+      );
+      if (!res.body) throw new Error("No response body");
 
-    while (true) {
-      const stream = await reader?.read();
-      if (stream?.done) break;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
 
-      result += decoder.decode(stream?.value, { stream: true });
-      setResponse(result); // Update the response progressively
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        try {
+          console.log(chunk);
+          const parsed = JSON.parse(chunk);
+          result += parsed.response;
+          setResponse(result); // Update the response progressively
+        } catch (err) {
+          console.error("Error parsing chunk:", err);
+        }
+      }
+    } catch (err) {
+      console.error("Streaming error:", err);
     }
   };
 
@@ -53,9 +66,9 @@ const SearchComponent = () => {
         </button>
       </div>
 
-      <div className="">
+      <div className="max-w-xl flex flex-col gap-1">
         <h3>Response:</h3>
-        <pre>{response}</pre>
+        <p>{response}</p>
       </div>
     </div>
   );
