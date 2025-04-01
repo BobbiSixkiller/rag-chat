@@ -19,13 +19,13 @@ app.add_middleware(
 
 
 # Load embedding model
-model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+model = SentenceTransformer('sentence-transformers/LaBSE')
 
 # MongoDB Connection
 MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://user:pass@mongodb:27017/?directConnection=true')
 client = MongoClient(MONGO_URI)
 db = client["cms_db"]
-collection = db["cms_documents"]
+collection = db["cms_docs"]
 
 class TextPayload(BaseModel):
     text: str
@@ -61,7 +61,7 @@ async def search_similar_documents(
                 "$vectorSearch": {
                     "queryVector": embedding,
                     "path": "embedding",
-                    "numCandidates": 100,
+                    "numCandidates": 1000,
                     "limit": limit,
                     "index": "cmsVector",  # Ensure this matches your MongoDB index name
                     "filter": {"language": language}  # Filter results by language
@@ -77,7 +77,10 @@ async def search_similar_documents(
                     "language": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
-            }
+            }, 
+            # {
+            #     "$match": { "score": { "$gt": 0.8 } }
+            # }
         ])
 
         # # Build a prompt for the Ollama model using the query and the search results
@@ -110,6 +113,7 @@ async def search_similar_documents(
 
         # # Return the streaming response
         # return StreamingResponse(generate_stream(), media_type="text/plain")
+
         return list(results)
 
     except Exception as e:
