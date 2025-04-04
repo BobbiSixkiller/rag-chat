@@ -25,7 +25,8 @@ model = SentenceTransformer('sentence-transformers/LaBSE')
 MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://user:pass@mongodb:27017/?directConnection=true')
 client = MongoClient(MONGO_URI)
 db = client["cms_db"]
-collection = db["cms_docs"]
+content = db["cms_docs"]
+categories = db["categories"]
 
 class TextPayload(BaseModel):
     text: str
@@ -56,7 +57,7 @@ async def search_similar_documents(
         embedding = model.encode(query).tolist()
         
         # Perform vector search with language filtering
-        results = collection.aggregate([
+        results = content.aggregate([
             {
                 "$vectorSearch": {
                     "queryVector": embedding,

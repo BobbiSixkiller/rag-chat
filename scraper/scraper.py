@@ -8,7 +8,7 @@ from urllib.parse import urljoin, urlparse
 from pymongo.mongo_client import MongoClient
 import logging
 import re
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 # Lock file to prevent multiple instances
 LOCK_FILE = "/tmp/scraper.lock"
@@ -42,13 +42,50 @@ START_URLS = [
 DOMAIN = urlparse(START_URLS[0]).netloc  # Restrict crawling to this domain
 
 # MongoDB setup
+# MongoDB client and collection with error handling
 try:
     client = MongoClient(MONGO_URI)
     db = client["cms_db"]
-    collection = db["cms_docs"]
+    content_collection = db["cms_docs"]
+    
+    search_index_def = {
+        "name": "cmsVector",
+        "definition": {
+            "mappings": {
+                "dynamic": True,
+                "fields": {
+                    "embedding": {
+                        "type": "knnVector",
+                        "dimensions": 768,  # Ensure this matches your embedding model
+                        "similarity": "cosine"
+                    },
+                    "language": {
+                        "type": "token"  # Use 'token' instead of 'string'
+                    },
+                    "category_id": {
+                        "type": "string"  # Change from "ObjectId" to "string"
+                    }
+                }
+            }
+        }
+    }
+    # Ensure the collection exists by inserting a dummy document
+    try:
+        content_collection.insert_one({"_id": "dummy"})
+        logging.info("✅ Dummy document inserted to create the collection.")
+    except Exception as e:
+        logging.error("❌ Failed to insert dummy document: %s", e)
+
+    try:
+        vectorIndex = content_collection.create_search_index(search_index_def)
+        logging.info("✅ Vector search index created successfully: %s", vectorIndex)
+    except Exception as e:
+        logging.error("❌ Failed to create search index: %s", e)
+    content_collection.delete_one({"_id": "dummy"})
+    logging.info("🗑️ Dummy document removed after index creation.")
 except Exception as e:
-    logging.error("❌ Failed to connect to MongoDB: %s", e)
-    sys.exit(1)
+    logging.error("❌ Failed to set up MongoDB: %s", e)
+    sys.exit(1)  # Exit if MongoDB is not available
 
 def chunk_text(text, chunk_size=500, stride=150):
     words = text.split()
@@ -62,7 +99,7 @@ class ScrapedData(TypedDict):
     chunk_id: str
     category_id: str
 
-def scrape_page(url: str) -> list[ScrapedData] | None:
+def scrape_page(url: str) -> Optional[list[ScrapedData]]:
     """Scrapes the page for content and extracts additional links."""
     logging.info("Scraping: %s", url)
     language = "en" if "/en/" in url else "sk"
@@ -80,9 +117,12 @@ def scrape_page(url: str) -> list[ScrapedData] | None:
     breadcrumbs = soup.find("div", class_="breadcrumb")
     if breadcrumbs and soup.title:
         breadcrumb_links = breadcrumbs.find_all("a")[:3]
-        category_name = " > ".join(link.get_text(strip=True) for link in breadcrumb_links) if breadcrumb_links else soup.title.string
-        category_url = f'{DOMAIN}{breadcrumb_links[-1]["href"]}' if breadcrumb_links else url
-        category = {"name": category_name, "url": category_url}
+        # Construct the category name: breadcrumb texts followed by the page title
+        breadcrumb_text = " > ".join(link.get_text(strip=True) for link in breadcrumb_links)
+        
+        category_name = f"{breadcrumb_text} > {soup.title.string}" if breadcrumb_text else soup.title.string        
+        # category_url = f'{DOMAIN}{breadcrumb_links[-1]["href"]}' if breadcrumb_links else url
+        category = {"name": category_name, "url": url}
         
         db["categories"].update_one({"name": category["name"]}, {"$set": category}, upsert=True)
         category_doc = db["categories"].find_one({"name": category["name"]}, {"_id": 1})
@@ -147,13 +187,18 @@ def extract_links(url: str) -> list[str]:
         logging.error("❌ Failed to fetch page %s: %s", url, e)
         return []
 
-    links = [a["href"] for a in soup.select("ul.nav li:not(.back) a") if a.get("href")]
-    return [urljoin(url, link) for link in links if is_valid_link(link)]
+    links = [urljoin(f'https://{DOMAIN}', a["href"]) for a in soup.select("ul.nav li:not(.back) a") if a.get("href")]
+
+    logging.info("Extracted links %s", links)
+    return [link for link in links if is_valid_link(link)]
 
 def is_valid_link(link: str) -> bool:
     """Checks if the link should be followed."""
-    exclude_patterns = ["/pics/", "/fileadmin/", "/uploads/", "/mapa-stranky/", "/rss/", "/sitemap/", "/mapa/", "/map/"]
-    return urlparse(link).netloc == DOMAIN and not any(pattern in link for pattern in exclude_patterns)
+    exclude_patterns = ["/pics/", "/fileadmin/", "/uploads/", "/rss/", "/mapa/", "/map/", "/mapa-stranky/", "/site-map/"]
+    valid = urlparse(link).netloc == DOMAIN and not any(pattern in link for pattern in exclude_patterns)
+    if not valid:
+        logging.info(f"Excluded link: {link}")
+    return valid
 
 def crawl(urls: list[str], visited: set[str], depth: int, max_depth: int):
     """Recursively scrapes pages and extracts additional links."""
@@ -161,13 +206,14 @@ def crawl(urls: list[str], visited: set[str], depth: int, max_depth: int):
         return
 
     next_urls = set()
-    
+    logging.info(f"Current depth: {depth}, URLs to crawl: {len(urls)}")
+
     for url in urls:
         if url in visited:
             continue
 
         visited.add(url)
-        logging.info("🔍 Crawling URL: %s (depth: %s)", url, depth)
+        logging.info(f"🔍 Crawling URL: {url} (depth: {depth})")
 
         # Scrape page content
         data_chunks = scrape_page(url)
@@ -177,12 +223,16 @@ def crawl(urls: list[str], visited: set[str], depth: int, max_depth: int):
                 update_embedding(doc)
 
         # Extract new links
-        next_urls.update(extract_links(url))
+        new_links = extract_links(url)
+        next_urls.update(new_links)
+        logging.info(f"Found {len(new_links)} new links from {url}")
 
     # Recursively crawl the next set of links
     if next_urls:
+        logging.info(f"Going to next depth level: {depth + 1}")
         time.sleep(2)  # Avoid excessive requests
         crawl(list(next_urls), visited, depth + 1, max_depth)
+
 
 def main():
     try:
@@ -194,6 +244,9 @@ def main():
         initial_links = []
         for start_url in START_URLS:
             initial_links.extend(extract_links(start_url))
+            
+        logging.info("Extracted links: %s", initial_links)
+
 
         # Start recursive crawling from extracted links
         crawl(initial_links, visited, 1, max_depth)

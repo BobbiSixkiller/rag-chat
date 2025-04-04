@@ -1,1 +1,1 @@
-0 0 * * * root python /app/scraper.py >> /var/log/cron.log 2>&1
+0 0 * * * python3 /app/scraper.py >> /var/log/cron.log 2>&1
